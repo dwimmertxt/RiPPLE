@@ -3,6 +3,7 @@
 use clap::Parser;
 
 pub mod maff;
+pub mod domain;
 pub mod txt;
 pub mod wav;
 pub mod waveform;
@@ -37,6 +38,12 @@ fn ripple(args: Args) {
         &args.duration, &args.sample_rate);
 
     if args.wav {wav::generate(&wf_time_domain, &args.sample_rate)};
-    if args.time {txt::time_domain(&wf_time_domain, &args.norm)};
-    if args.freq {txt::freq_domain(&wf_time_domain, &args.norm)};
+    if args.time {
+        txt::time(&wf_time_domain, &args.norm);
+    };
+    if args.freq {
+        let freq_domain = domain::freq_domain(&wf_time_domain, &args.norm);
+        txt::freq(&freq_domain);
+    };
+    
 }
