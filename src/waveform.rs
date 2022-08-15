@@ -1,7 +1,7 @@
 use crate::maff::{conv_base, hsl_to_rgb, rgb_to_integer};
 
 
-pub fn generate_samples(duration: &u32, sample_rate: &u32) -> Vec<u32> {
+pub fn samples(duration: &u32, sample_rate: &u32) -> Vec<u32> {
     let num_samples = duration * sample_rate;
     let mut samples = Vec::new();
     for t in 0..num_samples {
