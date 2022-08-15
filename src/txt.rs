@@ -38,7 +38,7 @@ pub fn freq_domain(wf_time_domain: &Vec<u32>, norm: &bool) {
             wf_freq_domain.push(
                 Complex{ re: *amplitude as f32, im: 0.0 });
         },
-    };
+    }
 
     let wf_len = wf_freq_domain.len() as usize;
     let mut planner = FftPlanner::<f32>::new();
