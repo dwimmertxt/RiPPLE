@@ -43,9 +43,6 @@ pub fn normalise(val: i32, norm: &Vec<i32>) -> i32 {
 }
 
 
-pub fn rgb_to_integer(rgb: &[u8; 3]) -> i32 {
-    let r = rgb[0] as i32;
-    let g = rgb[1] as i32;
-    let b = rgb[2] as i32;
-    (65536 * r) + (256 * g) + b
+pub fn rgb_to_integer(rgb: [u8; 3]) -> i32 {
+    (65536 * (rgb[0] as i32)) + (256 * (rgb[1] as i32)) + (rgb[2] as i32)
 }
