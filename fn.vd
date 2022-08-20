@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+global		filetype	set-option	csv		
+			open-file	-	o	
+-	frequency		type-int		#	set type of current column to int
+-	frequency		key-col		!	toggle current column as a key column
+-	magnitude		type-int		#	set type of current column to int

@@ -1,40 +1,45 @@
 use rustfft::{FftPlanner, num_complex::Complex};
+use crate::maff::{conv_base, hsl_to_rgb, normalise, rgb_to_integer};
 
-use crate::maff::norm_to_audible_freq;
-
-#[derive(Debug)]
-pub struct FreqMag {
-    pub f:   f32,
-    pub m:    f32,
+pub fn time(resolution: &i32, norm: &Vec<i32>, x: &i32, y: &i32) -> Vec<i32> {
+    let mut time_domain = Vec::new();
+    for t in 0..*resolution {
+        let rgb = hsl_to_rgb(
+            ((conv_base(t + x, 360) * conv_base(t + y, 360)) % 360) as f64,
+            (((conv_base(t + x, 100) * conv_base(t + y, 100)) % 100) as f64) * 0.01,
+            (((conv_base(t + x, 100) * conv_base(t + y, 100)) % 100) as f64) * 0.01,
+        );
+        match norm.is_empty() {
+            true => {
+                time_domain.push(rgb_to_integer(&rgb));
+            },
+            false => {
+                time_domain.push(normalise(rgb_to_integer(&rgb), &norm));
+            },
+        }
+    }
+    time_domain
 }
 
 
-pub fn freq_domain(wf_time_domain: &Vec<u32>, norm: &bool) -> Vec<FreqMag> {
-    let mut wf_freq_domain = Vec::new();
-    match *norm {
-        true => for amplitude in &*wf_time_domain {
-            wf_freq_domain.push(
-                Complex{ re: norm_to_audible_freq(*amplitude) as f32, im: 0.0 });
-        },
-        false => for amplitude in &*wf_time_domain {
-            wf_freq_domain.push(
-                Complex{ re: *amplitude as f32, im: 0.0 });
-        },
+pub fn frequency(time_domain: &Vec<i32>) -> Vec<i32> {
+    let mut fft_buffer = Vec::new();
+
+    for amplitude in &*time_domain {
+        fft_buffer.push(Complex{ re: (*amplitude as f64), im: 0.0});
     }
 
-    let wf_len = wf_freq_domain.len() as usize;
-    let mut planner = FftPlanner::<f32>::new();
-    let fft = planner.plan_fft_forward(wf_len);
-    fft.process(&mut wf_freq_domain);
+    let fft_buffer_len = fft_buffer.len() as usize;
+    let mut planner = FftPlanner::<f64>::new();
+    let fft = planner.plan_fft_forward(fft_buffer_len);
+    fft.process(&mut fft_buffer[..]);
     
+    let fft_result = &fft_buffer[0..fft_buffer.len() / 2];
+
     let mut freq_domain = Vec::new();
-    for (freq, complex_num) in wf_freq_domain.iter().enumerate() {
+    for complex_num in fft_result {
         let magnitude = (complex_num.re.powi(2) + complex_num.im.powi(2)).sqrt();
-        let fm = FreqMag {
-            f: freq as f32,
-            m: magnitude,
-        };
-        freq_domain.push(fm);
+        freq_domain.push(magnitude as i32);
     }
     freq_domain
 }
