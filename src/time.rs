@@ -1,25 +1,26 @@
-use crate::maff::{conv_base, hsl_to_rgb, normalise, rgb_to_integer};
+use crate::maff::{conv_base, hsl_to_rgb, rgb_to_integer};
 
 
-pub fn domain(norm: &Vec<i32>, width: &i32, height: &i32, t: i32) -> Vec<i32> {
-    let mut time_domain = Vec::new();
-    for y in 0..*height {
-        for x in 0..*width {
-            time_domain.push(amplitude(norm, x, y, None, &t));
+pub fn domain(width: &u16, height: &u16, depth: &u16, t: &u16) -> Vec<u32> {
+    let mut time_domain: Vec<u32> = Vec::new();
+    for x in 0..*width {
+        let mut amplitudes: Vec<u64> = Vec::new();
+        for y in 0..*height {
+            for z in 0..*depth {
+                amplitudes.push(amplitude(x, y, z, *t));
+            }
         }
+        let sum: u64 = amplitudes.iter().sum();
+        time_domain.push((sum / amplitudes.len() as u64) as u32);
     }
-    time_domain 
+    time_domain
 }
 
 
-pub fn amplitude(norm: &Vec<i32>, x: i32, y: i32, z: Option<i32>, t: &i32) -> i32 {
-    let rgb = hsl_to_rgb(
-        (conv_base(*t, 360) * z.unwrap_or(1) - &y * &x).rem_euclid(360) as f64,
-        ((conv_base(*t, 100) * z.unwrap_or(1) - &y * &x).rem_euclid(100) as f64) * 0.01,
-        ((conv_base(*t, 100) * z.unwrap_or(1) - &y * &x).rem_euclid(100) as f64) * 0.01,
-    );
-    match norm.is_empty() {
-        true => rgb_to_integer(rgb),
-        false => normalise(rgb_to_integer(rgb), &norm),
-    }
+pub fn amplitude(x: u16, y: u16, z: u16, t: u16) -> u64 {
+    rgb_to_integer(hsl_to_rgb(
+        (conv_base_sum(t, 360) * &z - &y * &x).rem_euclid(360) as f64,
+        ((conv_base_sum(t, 100) * &z - &y * &x).rem_euclid(100) as f64) * 0.01,
+        ((conv_base_sum(t, 100) * &z - &y * &x).rem_euclid(100) as f64) * 0.01,
+    )) as i64
 }

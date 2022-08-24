@@ -1,10 +1,11 @@
+
 use std::fs::File;
 use std::io::{Write, Error, stdout};
 
-use crate::arg;
+//use crate::arg;
+//use std::str;
 
-
-
+/*
 pub fn prism(args: &arg::Prism, domains_1d: &Vec<Vec<i32>>, domains_2d: &Vec<Vec<Vec<i32>>>) {
     let mut time_jsonl      = Vec::new();
     let mut frequency_jsonl = Vec::new();
@@ -106,6 +107,7 @@ fn jsonl_domains(data: &Vec<Vec<i32>>, domain: &str) -> Vec<String> {
     let x_field_str;
     let y_field_str;
 
+    
     match domain {
         "time"      => {
             x_field_str = "Time";
@@ -143,7 +145,7 @@ fn jsonl_domains(data: &Vec<Vec<i32>>, domain: &str) -> Vec<String> {
     for t in 0..domain_len {
         jsonl[t as usize] = format!("{}{}", jsonl[t as usize], "}\n".to_string());
     }
-
+    jsonl.insert(0, format!("{}", "[ ]\n"));
     jsonl
 }
 
@@ -184,3 +186,11 @@ fn pipe_out(jsonl: &Vec<String>) -> Result<(), Error> {
     Ok(())
 }
 
+*/
+
+pub fn save(data: &Vec<u8>, file_name: &str) -> Result<(), Error> {
+    let path = format!("{}.ripl", file_name);
+    let mut output = File::create(path)?;
+    output.write_all(&data[..])?;
+    Ok(())
+}

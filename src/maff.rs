@@ -1,6 +1,6 @@
-pub fn conv_base(mut n: i32, b: i32) -> i32 {
+pub fn conv_base_sum(mut n: i16, b: i16) -> i16 {
     // converts number n into base b
-    // then returns converted num modulo b
+    // and returns sum of its digits
     let mut digits = vec![0];
     while n > 0 {
         digits.push(n.rem_euclid(b));
@@ -43,6 +43,6 @@ pub fn normalise(val: i32, norm: &Vec<i32>) -> i32 {
 }
 
 
-pub fn rgb_to_integer(rgb: [u8; 3]) -> i32 {
-    (65536 * (rgb[0] as i32)) + (256 * (rgb[1] as i32)) + (rgb[2] as i32)
+pub fn rgb_to_integer(rgb: [u8; 3]) -> u64 {
+    (65536 * (rgb[0] as u64)) + (256 * (rgb[1] as u64)) + (rgb[2] as u64)
 }
