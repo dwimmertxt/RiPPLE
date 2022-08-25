@@ -7,6 +7,7 @@ pub mod entry;
 pub mod export;
 pub mod frequency;
 pub mod harmonic;
+pub mod import;
 pub mod maff;
 pub mod ripple;
 pub mod wav;

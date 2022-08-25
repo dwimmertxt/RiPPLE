@@ -1,36 +1,26 @@
-use crate::arg::Commands;
-use crate::decode;
 use crate::encode;
 use crate::export;
 use crate::maff::{conv_base_sum, hsl_to_rgb, rgb_to_integer};
 
 
-pub fn generate(args: Commands) { 
+pub fn generate(width: u16, height: u16, depth: u16, resolution: u16, save: bool, valve: bool) { 
+    /// generate a number of time frames
     
     let mut ripple_f: Vec<Vec<u32>> = Vec::new(); // ripple frames; frame = time domain
-    
-    match args {
-        Commands::Ripple {width, height, depth, resolution, save, valve} => {
-            for t in 0..resolution {
-                ripple_f.push(time_domain(&width, &height, &depth, &t));
-            }
-            let mut ripple_f_ripl: Vec<u8> = Vec::new();
-            if save {
-                ripple_f_ripl = encode::ripple(ripple_f, width, height, depth, resolution);
-                export::save(&ripple_f_ripl, "ripple");
-                if let Ok(data) = decode::ripple() {
-                    println!("{:?}", &data[..10]);
-                }
-            }
-            if !valve {
-                if ripple_f_ripl.is_empty() {
-                    //time_domains_ripl = encode::ripl();
-                } else {
-                    //export::pipe();
-                }
-            }
-        },
-        _ => unreachable!(),
+    for t in 0..resolution {
+        ripple_f.push(time_domain(&width, &height, &depth, &t));
+    }
+
+    let ripple_f_ripl: Vec<u8> = encode::ripple(ripple_f, width, height, depth, resolution);  
+    if save {
+        if let Err(_) = export::save(&ripple_f_ripl, "ripple") {
+            println!("Error saving ripple_f_ripl to file.");
+        }
+    }
+    if !valve {
+        if let Err(_) = export::pipe(ripple_f_ripl) {
+            println!("Error piping ripple_f_ripl to stdout.")
+        }
     }
 }
 

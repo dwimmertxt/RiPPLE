@@ -66,7 +66,7 @@ pub enum Commands {
         #[clap(display_order=5, short='s', long="save")]
         save: bool,
         /// pipe shutoff valve; nothing sent to stdout.
-        #[clap(display_order=6, short='v', long="valve")]
+        #[clap(display_order=6, short='v', long="valve", requires="save")]
         valve: bool,
     },
     /// Generate a frequency domain by performing a Fast Fourier Transform 
@@ -77,10 +77,13 @@ pub enum Commands {
         #[clap(display_order=1, short='s', long="save")]
         save: bool,
         /// pipe shutoff valve; nothing sent to stdout.
-        #[clap(display_order=2, short='v', long="valve")]
+        #[clap(display_order=2, short='v', long="valve", requires="save")]
         valve: bool,
+        /// name of file to import
+        #[clap(display_order=3, value_parser)]
+        file: Vec<String>,
     },
-    /*/// Perform harmonic analysis on the input frequency domain to find the 
+    /// Perform harmonic analysis on the input frequency domain to find the 
     /// fundamental frequency and find the harmonics. 
     /// Optionally save to file and/or enable the shutoff valve to stdout.
     #[clap(short_flag='H', long_flag="Harmonic", name="H", author="dwimmer")]
@@ -89,7 +92,10 @@ pub enum Commands {
         #[clap(display_order=1, short='s', long="save")]
         save: bool,
         /// pipe shutoff valve; nothing sent to stdout.
-        #[clap(display_order=2, short='v', long="valve")]
+        #[clap(display_order=2, short='v', long="valve", requires="save")]
         valve: bool,
-    },*/
+        /// name of file to import
+        #[clap(display_order=3, value_parser)]
+        file: Vec<String>,
+    },
 }

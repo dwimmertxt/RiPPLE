@@ -1,4 +1,3 @@
-
 use std::fs::File;
 use std::io::{Write, Error, stdout};
 
@@ -174,19 +173,14 @@ fn save(args: &arg::Prism, jsonl: &Vec<String>, domain: &str) -> Result<(), Erro
     output.write_all(&lines[..])?;
     Ok(())
 }
+*/
 
-
-fn pipe_out(jsonl: &Vec<String>) -> Result<(), Error> {
+pub fn pipe(data: Vec<u8>) -> Result<(), Error> {
     let mut stdout = stdout();
-    let mut lines = Vec::new();
-    for line in jsonl {
-        lines.extend(line.as_bytes());
-    }
-    stdout.write_all(&lines[..])?;
+    stdout.write_all(&data[..])?;
     Ok(())
 }
 
-*/
 
 pub fn save(data: &Vec<u8>, file_name: &str) -> Result<(), Error> {
     let path = format!("{}.ripl", file_name);
