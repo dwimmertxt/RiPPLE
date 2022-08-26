@@ -4,37 +4,24 @@ use crate::import;
 
 
 
-pub fn process(save: bool, valve: bool, file: &Vec<String>) { 
-    /// process a number of frequency frames to obtain their respective harmonic series'
+pub fn process(save: bool, shutsave: bool, file: &Vec<String>) { 
+    // process a number of frequency frames to obtain their respective harmonic series'
 
-    let mut freq_f: Vec<Vec<u32>> = Vec::new();
-    if !file.is_empty() {
-        match import::file(file) {
-            Ok(data) => freq_f = data,
-            Err(_) => println!("Error importing file."), 
-        }
-    } else {
-        match import::pipe() {
-            Ok(data) => freq_f = data,
-            Err(_) => println!("Error piping from stdin."), 
-        }
-    }
+    match import::data_frames(&file) {
+        Ok(freq_d) => {
+            let (_id, freq_f) = freq_d;
+            let mut harm_f: Vec<Vec<u32>> = Vec::new(); // harmonic frames; frame = harmonic series
+            for fd in freq_f {
+                harm_f.push(harmonic_series(&fd));
+            }
+            let harm_f_ripl: Vec<u8> = encode::harmonic(&harm_f, &harm_f.len());
+            if let Err(export_err) = export::data_frames(
+                harm_f_ripl, "HARM.ripl", save, shutsave) {
 
-    let mut harm_f: Vec<Vec<u32>> = Vec::new(); // harmonic frames; frame = harmonic series
-    for fd in freq_f {
-        harm_f.push(harmonic_series(&fd));
-    }
-
-    let harm_f_ripl: Vec<u8> = encode::harmonic(harm_f);
-    if save {
-        if let Err(_) = export::save(&harm_f_ripl, "harm") {
-            println!("Error saving harm_f_ripl to file.");
-        }
-    }
-    if !valve {
-        if let Err(_) = export::pipe(harm_f_ripl) {
-            println!("Error piping harm_f_ripl to stdout.")
-        }
+                eprintln!("{:?}", export_err);
+            }
+        },
+        Err(import_err) => eprintln!("{:?}", import_err),
     }
 }
 

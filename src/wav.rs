@@ -26,8 +26,8 @@ pub fn generate(waveform_samples: &Vec<i32>) {
 
     let wav_file = create_wav_file(&wav_buffer);
     match wav_file {
-        Ok(()) => println!("Successfully created ripple.wav"),
-        Err(_) => println!("Error creating ripple.wav"),
+        Ok(()) => eprintln!("Successfully created ripple.wav"),
+        Err(_) => eprintln!("Error creating ripple.wav"),
     }
 }
 

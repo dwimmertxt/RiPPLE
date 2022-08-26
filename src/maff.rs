@@ -1,4 +1,4 @@
-pub fn conv_base_sum(mut n: i16, b: i16) -> i16 {
+pub fn conv_base_sum(mut n: i32, b: i32) -> i32 {
     // converts number n into base b
     // and returns sum of its digits
     let mut digits = vec![0];

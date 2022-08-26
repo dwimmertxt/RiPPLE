@@ -6,43 +6,28 @@ use crate::import;
 
 
 
-pub fn process(save: bool, valve: bool, file: &Vec<String>) { 
-    /// process a number of time frames to obtain their respective frequency domains
-
-    let mut time_f: Vec<Vec<u32>> = Vec::new();
-    if !file.is_empty() {
-        match import::file(file) {
-            Ok(data) => time_f = data,
-            Err(_) => println!("Error importing file."), 
-        }
-    } else {
-        match import::pipe() {
-            Ok(data) => time_f = data,
-            Err(_) => println!("Error piping from stdin."), 
-        }
-    }
-
-    let mut freq_f: Vec<Vec<u32>> = Vec::new(); // frequency frames; frame = frequency domain
-    for td in time_f {
-        freq_f.push(frequency_domain(&td));
-    }
-
-    let freq_f_ripl: Vec<u8> = encode::frequency(freq_f); 
-    if save {
-        if let Err(_) = export::save(&freq_f_ripl, "freq") {
-            println!("Error saving freq_f_ripl to file.");
-        }
-    }
-    if !valve {
-        if let Err(_) = export::pipe(freq_f_ripl) {
-            println!("Error piping freq_f_ripl to stdout.")
-        }
+pub fn process(save: bool, shutsave: bool, file: &Vec<String>) { 
+    // process a number of time frames to obtain their respective frequency domains
+    match import::data_frames(&file) {
+        Ok(time_d) => {
+            let (_id, time_f) = time_d;
+            let mut freq_f: Vec<Vec<u32>> = Vec::new();
+            for td in time_f {
+                freq_f.push(frequency_domain(&td));
+            }
+            let freq_f_ripl: Vec<u8> = encode::frequency(&freq_f, &freq_f[0].len());
+            if let Err(export_err) = export::data_frames(
+                freq_f_ripl, "FREQ.ripl", save, shutsave) {
+                
+                eprintln!("ERR: failed to export data frames in Frequency.\n{:?}", export_err);   
+            }
+        },
+        Err(import_err) => eprintln!("ERR: failed to import data frames in Frequency.\n{:?}", import_err),
     }
 }
 
 
 pub fn frequency_domain(time_domain: &Vec<u32>) -> Vec<u32> {
-    ///
 
     let mut fft_pre = Vec::new();
     for amplitude in &*time_domain {
