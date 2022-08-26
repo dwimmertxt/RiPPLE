@@ -3,9 +3,9 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[clap(
-    name="RiPPLE", author="dwimmer", version="0.1.4", 
+    name="RiPPLE", author="dwimmer", version="0.1.5", 
     about="A multi-sensory signal hunting operation.", 
-    arg_required_else_help=true, hide_possible_values=true)]
+    arg_required_else_help=true, hide_possible_values=false)]
 pub struct Args {
     #[clap(subcommand)]
     pub command: Commands,
@@ -57,7 +57,7 @@ pub enum Commands {
     /// Perform harmonic analysis on the input frequency domain to find the 
     /// fundamental frequency and find the harmonics. 
     /// Optionally save to file and/or enable the shutoff valve to stdout.
-    #[clap(short_flag='H', long_flag="Harmonic", name="H", author="dwimmer")]
+    #[clap(long_flag="Harmonic", name="H", author="dwimmer")]
     Harmonic {
         /// save result to file
         #[clap(display_order=1, short='s', long="save", conflicts_with="shutsave")]
