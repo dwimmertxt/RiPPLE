@@ -1,29 +1,13 @@
 use rustfft::{FftPlanner, num_complex::Complex};
 
-use crate::encode;
-use crate::export;
-use crate::import;
 
-
-
-pub fn process(save: bool, shutsave: bool, file: &Vec<String>) { 
+pub fn process(time_frames: &Vec<Vec<u32>>) -> Vec<Vec<u32>> { 
     // process a number of time frames to obtain their respective frequency domains
-    match import::data_frames(&file) {
-        Ok(time_d) => {
-            let (_id, time_f) = time_d;
-            let mut freq_f: Vec<Vec<u32>> = Vec::new();
-            for td in time_f {
-                freq_f.push(frequency_domain(&td));
-            }
-            let freq_f_ripl: Vec<u8> = encode::frequency(&freq_f, &freq_f[0].len());
-            if let Err(export_err) = export::data_frames(
-                freq_f_ripl, "FREQ.ripl", save, shutsave) {
-                
-                eprintln!("ERR: failed to export data frames in Frequency.\n{:?}", export_err);   
-            }
-        },
-        Err(import_err) => eprintln!("ERR: failed to import data frames in Frequency.\n{:?}", import_err),
+    let mut freq_frames: Vec<Vec<u32>> = Vec::new();
+    for time_domain in time_frames {
+        freq_frames.push(frequency_domain(&time_domain));
     }
+    freq_frames
 }
 
 

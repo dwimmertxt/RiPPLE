@@ -6,7 +6,6 @@ pub mod import;
 pub mod export;
 pub mod encode;
 pub mod decode;
-pub mod jsonl;
 pub mod maff;
 pub mod time;
 pub mod frequency;
@@ -14,7 +13,7 @@ pub mod harmonic;
 pub mod wav;
 
 
-fn main() {
+fn main() {  
     entry::ripple()
 }
 

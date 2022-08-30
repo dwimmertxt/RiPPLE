@@ -54,3 +54,12 @@ LE | 00 |
 
 --DATA--
 
+---------------------------
+
+## make ripple into more of an intelligent general function
+q) how? what does that mean?
+a) retain ability to specify subcommand via clap; take advantage of ripl 
+   encoding to determine input data format. 
+
+if .ripl:
+- process "next step" e.g. if input == time: return frequency domain

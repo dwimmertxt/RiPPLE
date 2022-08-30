@@ -1,47 +1,75 @@
 use crate::encode;
 use crate::export;
-use crate::maff::{conv_base_sum, hsl_to_rgb, rgb_to_integer};
+use crate::maff::{ripple_1d, ripple_2d, ripple_3d};
 
 
-pub fn generate(
-    width: u32, height: u32, depth: u32, resolution: u32, 
-    save: bool, shutsave: bool) { 
+pub fn generate(width: u32, square: bool, cube: bool, frames: u32, save: bool) { 
     // generate a number of time frames
-    
-    let mut time_f: Vec<Vec<u32>> = Vec::new(); // ripple frames; frame = time domain
-    for t in 0..resolution {
-        time_f.push(time_domain(&width, &height, &depth, &t));
-    }
-    let time_f_ripl: Vec<u8> = encode::time(time_f, width, height, depth, resolution);  
-    if let Err(export_err) = export::data_frames(
-        time_f_ripl, "TIME.ripl", save, shutsave) {
+    let (time_frames, dimensionality) = match (square, cube) {
+        (false, false) => (time_domain(&width, &frames), 0u8),
+        (true, false)  => (square_time_domain(&width, &frames), 1u8),
+        (false, true)  => (cube_time_domain(&width, &frames), 2u8),
+        _              => unreachable!(),
+    };
 
+    let time_ripl: Vec<u8> = encode::time(&time_frames, &width, &dimensionality, &frames);  
+    if let Err(export_err) = export::data_frames("TIME.ripl", &time_ripl, &save) {
         eprintln!("{:?}", export_err);
     }
 }
 
 
-pub fn time_domain(width: &u32, height: &u32, depth: &u32, t: &u32) -> Vec<u32> {
-    let mut time_domain: Vec<u32> = Vec::new();
-    for x in 0..*width {
-        let mut amplitudes: Vec<u64> = Vec::new();
-        for y in 0..*height {
-            for z in 0..*depth {
-                // cast values to signed integers to allow subtraction operation 
-                amplitudes.push(amplitude(x as i32, y as i32, z as i32, *t as i32));
-            }
+fn time_domain(width: &u32, frames: &u32) -> Vec<Vec<u32>> {
+    let mut time_frames: Vec<Vec<u32>> = Vec::new();
+    for t in 0..*frames {
+        let mut amplitudes: Vec<u32> = Vec::new();
+        for x in 0..*width { 
+            // cast values to signed integers to allow subtraction operation
+            // suspicion: final value halved due to casting to i32. perhaps i64 instead? 
+            amplitudes.push(ripple_1d(&x, &t));
         }
-        let sum: u64 = amplitudes.iter().sum();
-        time_domain.push((sum / amplitudes.len() as u64) as u32);
+        time_frames.push(amplitudes.clone());
     }
-    time_domain
+    //println!("{:?}", time_frames);
+    time_frames 
 }
 
 
-pub fn amplitude(x: i32, y: i32, z: i32, t: i32) -> u64 {
-    rgb_to_integer(hsl_to_rgb(
-        (conv_base_sum(t, 360) * &z - &y * &x).rem_euclid(360) as f64,
-        ((conv_base_sum(t, 100) * &z - &y * &x).rem_euclid(100) as f64) * 0.01,
-        ((conv_base_sum(t, 100) * &z - &y * &x).rem_euclid(100) as f64) * 0.01,
-    )) as u64
+fn square_time_domain(width: &u32, frames: &u32) -> Vec<Vec<u32>> {
+    let mut time_frames: Vec<Vec<u32>> = Vec::new();
+    for t in 0..*frames {
+        let mut time_domain: Vec<u32> = Vec::new();
+        for x in 0..*width {
+            let mut amplitudes: Vec<u64> = Vec::new();
+            for y in 0..*width {
+                // cast values to signed integers to allow subtraction operation 
+                amplitudes.push(ripple_2d(&x, &y, &t) as u64);
+            }
+            let sum: u64 = amplitudes.iter().sum();
+            time_domain.push((sum / amplitudes.len() as u64) as u32);
+        }
+        time_frames.push(time_domain.clone());
+    }
+    time_frames
+}
+
+
+fn cube_time_domain(width: &u32, frames: &u32) -> Vec<Vec<u32>> {
+    let mut time_frames: Vec<Vec<u32>> = Vec::new();
+    for t in 0..*frames {
+        let mut time_domain: Vec<u32> = Vec::new();
+        for x in 0..*width {
+            let mut amplitudes: Vec<u64> = Vec::new();
+            for y in 0..*width {
+                for z in 0..*width {
+                    // cast values to signed integers to allow subtraction operation 
+                    amplitudes.push(ripple_3d(&x, &y, &z, &t) as u64);
+                }
+            }
+            let sum: u64 = amplitudes.iter().sum();
+            time_domain.push((sum / amplitudes.len() as u64) as u32);
+        }
+        time_frames.push(time_domain.clone());
+    }
+    time_frames
 }

@@ -1,28 +1,10 @@
-use crate::encode;
-use crate::export;
-use crate::import;
-
-
-
-pub fn process(save: bool, shutsave: bool, file: &Vec<String>) { 
+pub fn process(freq_frames: &Vec<Vec<u32>>) -> Vec<Vec<u32>> { 
     // process a number of frequency frames to obtain their respective harmonic series'
-
-    match import::data_frames(&file) {
-        Ok(freq_d) => {
-            let (_id, freq_f) = freq_d;
-            let mut harm_f: Vec<Vec<u32>> = Vec::new(); // harmonic frames; frame = harmonic series
-            for fd in freq_f {
-                harm_f.push(harmonic_series(&fd));
-            }
-            let harm_f_ripl: Vec<u8> = encode::harmonic(&harm_f, &harm_f.len());
-            if let Err(export_err) = export::data_frames(
-                harm_f_ripl, "HARM.ripl", save, shutsave) {
-
-                eprintln!("{:?}", export_err);
-            }
-        },
-        Err(import_err) => eprintln!("{:?}", import_err),
+    let mut harm_frames: Vec<Vec<u32>> = Vec::new(); // harmonic frames; frame = harmonic series
+    for freq_domain in freq_frames {
+        harm_frames.push(harmonic_series(&freq_domain));
     }
+    harm_frames
 }
 
 
